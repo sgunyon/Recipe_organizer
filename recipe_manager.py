@@ -1,20 +1,32 @@
-#!/usr/bin/python
+#!/usr/bin/python3
+
 from tkinter import *
 from tkinter import messagebox
 import os
+import sys
 import json
 
 
 class Mainwindow(Tk):
     def __init__(self):
         Tk.__init__(self)
+        self.add_icon()
         self.cwd = os.getcwd()
+        self.recipe_path = (os.path.join(self.cwd, 'Recipes'))
         self.geometry('375x320')
         self.create_list_fields()
         self.text = Text(self)
         container = self.create_container()
         self.create_pages(container)
         self.show_frame('Page_one')
+
+    def add_icon(self):
+        if sys.platform == 'win32':
+            self.iconbitmap(os.path.join('icons', 'icon.ico'))
+        elif sys.platform == 'darwin':
+            self.iconbitmap(os.path.join('icons', 'icon.icns'))
+        elif sys.platform == 'linux':
+            self.iconbitmap(os.path.join('icons', 'icon.xbm'))
 
     def create_list_fields(self):
         self.recipe_dict = {
@@ -159,12 +171,11 @@ class Page_one(Frame):
         return f_name
 
     def save_recipe(self):
-        if not os.path.exists(os.path.join(self.controller.cwd, 'Recipes')):
-            os.makedirs(os.path.join(self.controller.cwd, 'Recipes'))
-        recipe_path = (os.path.join(self.controller.cwd, 'Recipes'))
+        if not os.path.exists(self.controller.recipe_path):
+            os.makedirs(self.controller.recipe_path)
 
-        if os.getcwd() != recipe_path:
-            os.chdir(recipe_path)
+        if os.getcwd() != self.controller.recipe_path:
+            os.chdir(self.controller.recipe_path)
 
         json_file_name = self.create_py_dict()
 
@@ -173,7 +184,8 @@ class Page_one(Frame):
                 continue
             else:
                 self.bell()
-                messagebox.showinfo('Error', 'Please fill out all of the fields')
+                messagebox.showinfo('Error',
+                                    'Please fill out all of the fields')
                 return
 
         with open(json_file_name + '.json', 'w') as f:
@@ -186,24 +198,32 @@ class Page_two(Frame):
         Frame.__init__(self, parent)
         self.controller = controller
 
-        self.button3 = Button(self, text='Return Home', command=lambda: [controller.show_frame('Page_one'), self.controller.set_geo_page_one()])
+        self.button3 = Button(self, text='Return Home',
+                            command=lambda: [controller.show_frame('Page_one'),
+                            self.controller.set_geo_page_one()])
         self.button3.grid(row=0, column=0)
 
-        self.button4 = Button(self, text='Load Recipe',command=lambda:[controller.show_frame('Page_two'), self.load_recipe()])
+        self.button4 = Button(self, text='Load Recipe',
+                            command=lambda:[controller.show_frame('Page_two'),
+                            self.load_recipe()])
         self.button4.grid(row=1, column = 0)
 
         self.button5 = Button(self, text='All Recipes',
-                              command=lambda: [self.display_saved_recipes(), self.cat_ol_var.set('All')])
+                              command=lambda: [self.display_saved_recipes(),
+                              self.cat_ol_var.set('All')])
         self.button5.grid(row=0, column=1)
         self.button6 = Button(self, text='Delete Recipe',
-                              command=lambda: [self.delete_recipe(), self.display_saved_recipes()])
+                              command=lambda: [self.delete_recipe(),
+                              self.display_saved_recipes()])
         self.button6.grid(row=0, column=3, stick=E)
         self.button7 = Button(self, text='Edit Recipe',
                               command=lambda: [self.edit_recipe()])
         self.button7.grid(row=1, column=3, sticky=E)
         self.cat_ol_var = StringVar()
         self.cat_ol_var.set('All')
-        self.cat_ol = OptionMenu(self, self.cat_ol_var, *self.controller.option_list, command=self.refine_recipe_list)
+        self.cat_ol = OptionMenu(self, self.cat_ol_var,
+                                *self.controller.option_list,
+                                command=self.refine_recipe_list)
         self.cat_ol.grid(row=1, column=1)
 
         self.listbox = Listbox(self, height=24)
@@ -217,17 +237,17 @@ class Page_two(Frame):
 
     def display_saved_recipes(self):
         self.listbox.delete(0, END)
-        if not os.path.exists(os.path.join(self.controller.cwd, 'Recipes')):
-            os.makedirs(os.path.join(self.controller.cwd, 'Recipes'))
+        if not os.path.exists(self.controller.recipe_path):
+            os.makedirs(self.controller.recipe_path)
         count = 0
-        for filename in os.listdir((os.path.join(self.controller.cwd, 'Recipes'))):
+        for filename in os.listdir(self.controller.recipe_path):
             self.listbox.insert(count, os.path.splitext(filename)[0])
             count+=1
 
     def load_recipe(self):
         self.recipe_box.delete(1.0, END)
-        selected = self.listbox.get('active')
-        json_file = os.path.join(self.controller.cwd, 'Recipes', selected) + '.json'
+        select = self.listbox.get('active')
+        json_file = os.path.join(self.controller.recipe_path, select) + '.json'
         with open(json_file, 'r') as f:
             data = f.read()
 
@@ -242,7 +262,8 @@ class Page_two(Frame):
                 t_list = json_recipe.get(item)
                 if t_list[0] > 0 and t_list[1] > 0:
                     self.recipe_box.insert(
-                        END,'{} hours and {} minutes \n\n'.format(t_list[0], t_list[1]))
+                        END,'{} hours and {} minutes \n\n'.format
+                        (t_list[0], t_list[1]))
                 elif t_list[0] == 0:
                     self.recipe_box.insert(
                         END,'{} minutes \n\n'.format(t_list[1]))
@@ -262,11 +283,11 @@ class Page_two(Frame):
     def refine_recipe_list(self, value):
         self.listbox.delete(0, END)
         self.recipe_box.delete(1.0, END)
-        if not os.path.exists(os.path.join(self.controller.cwd, 'Recipes')):
-            os.makedirs(os.path.join(self.controller.cwd, 'Recipes'))
+        if not os.path.exists(self.controller.recipe_path):
+            os.makedirs(self.controller.recipe_path)
         count = 0
-        for filename in os.listdir((os.path.join(self.controller.cwd, 'Recipes'))):
-            json_file = os.path.join(self.controller.cwd, 'Recipes', filename)
+        for filename in os.listdir(self.controller.recipe_path):
+            json_file = os.path.join(self.controller.recipe_path, filename)
             with open(json_file, 'r') as f:
                 data = f.read()
             json_recipe = json.loads(data)
@@ -277,41 +298,44 @@ class Page_two(Frame):
                 count+=1
 
     def delete_recipe(self):
-        selected = self.listbox.get('active')
-        if messagebox.askyesno('Confirm', 'Are you sure you want to delete ' + os.path.splitext(selected)[0] + '?'):
-            delete = (os.path.join(self.controller.cwd, 'Recipes', selected) + '.json')
-            os.remove(delete)
+        select = self.listbox.get('active')
+        if messagebox.askyesno('Confirm',
+                            'Are you sure you want to delete '
+                            + os.path.splitext(select)[0] + '?'):
+            rmv = (os.path.join(self.controller.recipe_path, select) + '.json')
+            os.remove(rmv)
 
     def edit_recipe(self):
         self.controller.frames['Page_one'].clear_entries()
-        selected = self.listbox.get('active')
-        json_file = os.path.join(self.controller.cwd, 'Recipes', selected) + '.json'
+        select = self.listbox.get('active')
+        json_file = os.path.join(self.controller.recipe_path, select) + '.json'
         with open(json_file, 'r') as f:
             data = f.read()
 
         json_recipe = json.loads(data)
-
+        page_one = self.controller.frames['Page_one']
         for item in json_recipe:
             if item == 'name':
-                (self.controller.frames['Page_one'].entry.insert(0, json_recipe.get(item)))
+                page_one.entry.insert(0, json_recipe.get(item))
             if item == 'time':
                 t_list = json_recipe.get(item)
-                (self.controller.frames['Page_one'].entry_th.delete(0, END))
-                (self.controller.frames['Page_one'].entry_th.insert(0, t_list[0]))
-                (self.controller.frames['Page_one'].entry_tm.delete(0, END))
-                (self.controller.frames['Page_one'].entry_tm.insert(0, t_list[1]))
+                page_one.entry_th.delete(0, END)
+                page_one.entry_th.insert(0, t_list[0])
+                page_one.entry_tm.delete(0, END)
+                page_one.entry_tm.insert(0, t_list[1])
             if item == 'ingredients':
-                (self.controller.frames['Page_one'].entry_i.insert(0, json_recipe.get(item)))
+                page_one.entry_i.insert(0, json_recipe.get(item))
             if item == 'category':
-                (self.controller.frames['Page_one'].entry_ol.set(json_recipe.get(item)))
+                page_one.entry_ol.set(json_recipe.get(item))
             if item == 'directions':
-                (self.controller.frames['Page_one'].entry_d.insert(1.0, json_recipe.get(item)))
+                page_one.entry_d.insert(1.0, json_recipe.get(item))
 
         self.controller.show_frame('Page_one')
         self.controller.set_geo_page_one()
 
 if __name__ == '__main__':
+    print(sys.platform)
     app = Mainwindow()
     app.title('Recipe Organizer')
-    app.iconbitmap('icon.ico')
     app.mainloop()
+    
