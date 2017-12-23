@@ -13,7 +13,7 @@ class Mainwindow(Tk):
         self.add_icon()
         self.cwd = os.getcwd()
         self.recipe_path = (os.path.join(self.cwd, 'Recipes'))
-        self.geometry('375x320')
+        self.geometry('420x320')
         self.create_list_fields()
         self.text = Text(self)
         container = self.create_container()
@@ -25,8 +25,6 @@ class Mainwindow(Tk):
             self.iconbitmap(os.path.join('icons', 'icon.ico'))
         elif sys.platform == 'darwin':
             self.iconbitmap(os.path.join('icons', 'icon.icns'))
-        elif sys.platform == 'linux':
-            self.iconbitmap(os.path.join('icons', 'icon.xbm'))
 
     def create_list_fields(self):
         self.recipe_dict = {
@@ -72,10 +70,10 @@ class Mainwindow(Tk):
         frame.tkraise()
 
     def set_geo_page_one(self):
-        self.geometry('375x320')
+        self.geometry('420x320')
 
     def set_geo_page_two(self):
-        self.geometry('820x470')
+        self.geometry('780x470')
 
 
 class Page_one(Frame):
@@ -338,4 +336,3 @@ if __name__ == '__main__':
     app = Mainwindow()
     app.title('Recipe Organizer')
     app.mainloop()
-    
